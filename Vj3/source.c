@@ -33,9 +33,6 @@ int _procitajDatoteku(Pozicija);
 
 void main()
 {
-    char ulaz = 0;
-    FILE* pokazivacFajla = NULL;
-
     char prezime[50];
     Osoba glava = { .sljedeca = NULL, .ime = {0}, .prezime = {0}, .godinaRodjenja = 0 };
 
