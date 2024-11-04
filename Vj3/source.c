@@ -50,8 +50,13 @@ void main()
     ispisiListu(glava.sljedeca);
     
     scanf(" %s", prezime);
-    pronadiOsobu(glava.sljedeca, prezime) ? ispisiOsobu(pronadiOsobu(glava.sljedeca, prezime)) : printf("Osoba s prezimenom '%s' nije pronađena.\n", prezime);
-    
+    Osoba* pronadenaOsoba = pronadiOsobu(glava.sljedeca, prezime);
+    if (pronadenaOsoba) {
+        ispisiOsobu(pronadenaOsoba);
+    } else {
+        printf("Osoba s prezimenom '%s' nije pronađena.\n", prezime);
+    }
+
     scanf(" %s", prezime);
     obrisiOsobu(&glava, prezime);
     
