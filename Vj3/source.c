@@ -238,7 +238,6 @@ int upisiUFajl(Pozicija trenutna)
     pokazivacFajla = fopen("osobe.txt", "w");
 
     if (pokazivacFajla == NULL) {
-        printf("\nFajl nije mogao biti otvoren.\n");
         return FILE_ERROR_OPEN;
     }
 
@@ -261,7 +260,6 @@ int procitajDatoteku()
     fp = fopen("osobe.txt", "r");
 
     if (fp == NULL) {
-        printf("Fajl nije mogao biti otvoren.\n");
         return FILE_ERROR_OPEN;
     }
 
@@ -282,7 +280,6 @@ int _procitajDatoteku(Pozicija glava)
     pokazivacFajla = fopen("osobe.txt", "r");
 
     if (!pokazivacFajla) {
-        printf("Fajl nije mogao biti otvoren.\n");
         return FILE_ERROR_OPEN;
     }
 
@@ -295,7 +292,6 @@ int _procitajDatoteku(Pozicija glava)
     {
         trenutni = (Pozicija)malloc(sizeof(Osoba));
         if (!trenutni) {
-            printf("Greška u malloc-u!\n");
             return MALLOC_ERROR;
         }
         if (fscanf(pokazivacFajla, " %s %s %d ", trenutni->ime, trenutni->prezime, &trenutni->godinaRodjenja) != 3)
