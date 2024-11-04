@@ -29,7 +29,6 @@ int obrisiListu(Pozicija);
 int dodajIza(Pozicija, char*);
 int dodajIspred(Pozicija, char*);
 int upisiUFajl(Pozicija);
-int procitajDatoteku();
 int _procitajDatoteku(Pozicija);
 
 void main()
@@ -254,27 +253,6 @@ int upisiUFajl(Pozicija trenutna)
     fclose(pokazivacFajla);
 
     printf("Uspješno!\n");
-
-    return EXIT_SUCCESS;
-}
-
-int procitajDatoteku()
-{
-    char c = 0;
-    FILE* fp = NULL;
-    fp = fopen("osobe.txt", "r");
-
-    if (fp == NULL) {
-        return FILE_ERROR_OPEN;
-    }
-
-    c = getc(fp);
-    while (c != EOF) {
-        printf("%c", c);
-        c = getc(fp);
-    }
-        
-    fclose(fp);
 
     return EXIT_SUCCESS;
 }
