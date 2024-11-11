@@ -1,10 +1,12 @@
 #define _CRT_SECURE_NO_WARNINGS
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+<<<<<<< HEAD:Vj3/Source.cpp
 #define MAX_LINE 1024
+=======
+>>>>>>> ebb1a8ccc6265526c79c18aea78689d3eb911dd9:Vj3/source.c
 #define EXIT_SUCCESS 0
 #define FILE_ERROR_OPEN -1
 #define MALLOC_ERROR -2
@@ -31,80 +33,47 @@ int obrisiListu(Pozicija);
 int dodajIza(Pozicija, char*);
 int dodajIspred(Pozicija, char*);
 int upisiUFajl(Pozicija);
-int _procitajFajl();
-int procitajUFajl(Pozicija);
+int _procitajDatoteku(Pozicija);
 
 void main()
 {
+<<<<<<< HEAD:Vj3/Source.cpp
     char ulaz = 0;
     FILE* pokazivacFajla = NULL;
 
+=======
+>>>>>>> ebb1a8ccc6265526c79c18aea78689d3eb911dd9:Vj3/source.c
     char prezime[50];
     Osoba glava = { .sljedeca = NULL, .ime = {0}, .prezime = {0}, .godinaRodjenja = 0 };
-    Osoba glavaR = { .sljedeca = NULL, .ime = {0}, .prezime = {0}, .godinaRodjenja = 0 }; // za čitanje iz fajla
 
-    printf("f - dodaj osobu na pocetak liste\ne - dodaj osobu na kraj liste\na - dodaj osobu iza osobe s prezimenom\nb - dodaj osobu ispred osobe s prezimenom\np - ispiši listu\ns - pronađi osobu s prezimenom\nd - obriši osobu s prezimenom\nw - upisi listu u fajl\nr - pročitaj listu iz fajla\n");
+    dodajNaPocetakListe(&glava);
+    dodajNaKrajListe(&glava);
+    ispisiListu(glava.sljedeca);
+    
+    scanf(" %s", prezime);
+    dodajIza(&glava, prezime);
+    dodajIspred(&glava, prezime);
+    ispisiListu(glava.sljedeca);
+    
+    scanf(" %s", prezime);
+    Osoba* pronadenaOsoba = pronadiOsobu(glava.sljedeca, prezime);
+    if (pronadenaOsoba) {
+        ispisiOsobu(pronadenaOsoba);
+    } else {
+        printf("Osoba s prezimenom '%s' nije pronađena.\n", prezime);
+    }
 
-    do
-    {
-        printf("\nOdaberi akciju: ");
-        if (scanf(" %c", &ulaz) != 1) return SCANF_ERROR;
-
-        switch (ulaz)
-        {
-            case 'f':
-                printf("Dodavanje na pocetak liste\n");
-                dodajNaPocetakListe(&glava);
-                break;
-            case 'e':
-                printf("Dodavanje na kraj liste\n");
-                dodajNaKrajListe(&glava);
-                break;
-            case 'a':
-                printf("Dodaj iza osobe s prezimenom: ");
-                if (scanf(" %s", prezime) != 1) return SCANF_ERROR;
-                dodajIza(&glava, prezime);
-                break;
-            case 'b':
-                printf("Dodaj ispred osobe s prezimenom: ");
-                if (scanf(" %s", prezime) != 1) return SCANF_ERROR;
-                dodajIspred(&glava, prezime);
-                break;
-            case 'p':
-                printf("Ispisivanje liste:\n");
-                ispisiListu(glava.sljedeca);
-                break;
-            case 's':
-                printf("Pronađi osobu s prezimenom: ");
-                if (scanf(" %s", prezime) != 1) return SCANF_ERROR;
-                pronadiOsobu(glava.sljedeca, prezime) ?
-                    ispisiOsobu(pronadiOsobu(glava.sljedeca, prezime)) : printf("\tOsoba s prezimenom '%s' nije pronađena.\n", prezime);
-                break;
-            case 'd':
-                printf("Obriši osobu s prezimenom: ");
-                if (scanf(" %s", prezime) != 1) return SCANF_ERROR;
-                obrisiOsobu(&glava, prezime);
-                break;
-            case 'w':
-                printf("Upisivanje liste u fajl...\n");
-                upisiUFajl(glava.sljedeca);
-                break;
-            case 'r':
-                printf("Čitanje liste iz fajla:\n");
-                procitajUFajl(&glavaR);
-                ispisiListu(glavaR.sljedeca);
-                break;
-            case '0':
-                // Kraj programa
-                break;
-            default:
-                printf("\tNeispravan unos. Pokušaj ponovo.\n");
-                break;
-        }
-    } while (ulaz != '0');
+    scanf(" %s", prezime);
+    obrisiOsobu(&glava, prezime);
+    
+    //FILE
+    upisiUFajl(glava.sljedeca);
+    Osoba glavaKopija = { .sljedeca = NULL, .ime = {0}, .prezime = {0}, .godinaRodjenja = 0 };
+    _procitajDatoteku(&glavaKopija);
+    ispisiListu(glavaKopija.sljedeca);
 
     obrisiListu(&glava);
-    obrisiListu(&glavaR);
+    obrisiListu(&glavaKopija);
 
     return EXIT_SUCCESS;
 }
@@ -115,13 +84,13 @@ Pozicija kreirajOsobu()
     osoba = (Pozicija)malloc(sizeof(Osoba));
     if (!osoba) return NULL;
 
-    printf("\tIme: ");
+    printf("Ime: ");
     if (scanf(" %s", osoba->ime) != 1) return SCANF_ERROR;
 
-    printf("\tPrezime: ");
+    printf("Prezime: ");
     if (scanf(" %s", osoba->prezime) != 1) return SCANF_ERROR;
 
-    printf("\tGodina rođenja: ");
+    printf("Godina rođenja: ");
     if (scanf(" %d", &osoba->godinaRodjenja) != 1) return SCANF_ERROR;
 
     return osoba;
@@ -162,14 +131,14 @@ int dodajNaKrajListe(Pozicija glava)
 
 int ispisiOsobu(Pozicija osoba)
 {
-    printf("\t%s %s, rođen(a) %d. godine\n", osoba->ime, osoba->prezime, osoba->godinaRodjenja);
+    printf("%s %s, rođen(a) %d. godine\n", osoba->ime, osoba->prezime, osoba->godinaRodjenja);
     return EXIT_SUCCESS;
 }
 
 int ispisiListu(Pozicija trenutna)
 {
     if (trenutna == NULL)
-        printf("\tPrazna lista!\n");
+        printf("Prazna lista!\n");
 
     while (trenutna != NULL) {
         ispisiOsobu(trenutna);
@@ -209,9 +178,9 @@ int obrisiOsobu(Pozicija glava, char* sur)
         prethodni->sljedeca = temp->sljedeca;
         free(temp);
 
-        printf("\tOsoba obrisana.\n");
+        printf("Osoba obrisana.\n");
     }
-    else printf("\tOsoba s prezimenom '%s' nije pronađena.\n", sur);
+    else printf("Osoba s prezimenom '%s' nije pronađena.\n", sur);
 
     return EXIT_SUCCESS;
 }
@@ -247,7 +216,7 @@ int dodajIza(Pozicija glava, char* sur)
         novaOsoba->sljedeca = osobaSPrezimenom->sljedeca;
         osobaSPrezimenom->sljedeca = novaOsoba;
     }
-    else printf("\tOsoba s prezimenom '%s' nije pronađena.\n", sur);
+    else printf("Osoba s prezimenom '%s' nije pronađena.\n", sur);
 
     return EXIT_SUCCESS;
 }
@@ -269,19 +238,17 @@ int dodajIspred(Pozicija glava, char* sur)
         novaOsoba->sljedeca = osobaIspredPrezimenom->sljedeca;
         osobaIspredPrezimenom->sljedeca = novaOsoba;
     }
-    else printf("\tOsoba s prezimenom '%s' nije pronađena.\n", sur);
+    else printf("Osoba s prezimenom '%s' nije pronađena.\n", sur);
     
     return EXIT_SUCCESS;
 }
 
-// Upisuje sadržaj liste u fajl
 int upisiUFajl(Pozicija trenutna)
 {
     FILE* pokazivacFajla = NULL;
     pokazivacFajla = fopen("osobe.txt", "w");
 
     if (pokazivacFajla == NULL) {
-        printf("\nFajl nije mogao biti otvoren.\n");
         return FILE_ERROR_OPEN;
     }
 
@@ -292,65 +259,38 @@ int upisiUFajl(Pozicija trenutna)
 
     fclose(pokazivacFajla);
 
-    printf("\tUspješno!\n");
+    printf("Uspješno!\n");
 
     return EXIT_SUCCESS;
 }
 
-// Čita i ispisuje sadržaj fajla
-int _procitajFajl()
-{
-    char c = 0;
-    FILE* fp = NULL;
-    fp = fopen("osobe.txt", "r");
-
-    if (fp == NULL) {
-        printf("Fajl nije mogao biti otvoren.\n");
-        return FILE_ERROR_OPEN;
-    }
-
-    c = getc(fp);
-    while (c != EOF) {
-        printf("%c", c);
-        c = getc(fp);
-    }
-        
-    fclose(fp);
-
-    return EXIT_SUCCESS;
-}
-
-// Čita i pohranjuje sadržaj fajla u listu
-int procitajUFajl(Pozicija glava)
+int _procitajDatoteku(Pozicija glava)
 {
     FILE* pokazivacFajla = NULL;
     pokazivacFajla = fopen("osobe.txt", "r");
 
     if (!pokazivacFajla) {
-        printf("Fajl nije mogao biti otvoren.\n");
         return FILE_ERROR_OPEN;
     }
 
     Pozicija prethodni = NULL, trenutni = NULL;
 
-    obrisiListu(glava); // da ponovo učitavanje ne dodaje sadržaj fajla u prethodni sadržaj
+    obrisiListu(glava);
     prethodni = glava;
 
     while (!feof(pokazivacFajla))
     {
-        trenutni = (Pozicija)malloc(sizeof(Osoba)); // pokazivač na novog učitanog čovjeka
+        trenutni = (Pozicija)malloc(sizeof(Osoba));
         if (!trenutni) {
-            printf("Greška u malloc-u!\n");
             return MALLOC_ERROR;
         }
         if (fscanf(pokazivacFajla, " %s %s %d ", trenutni->ime, trenutni->prezime, &trenutni->godinaRodjenja) != 3)
             return SCANF_ERROR;
 
-        // dodaj novu osobu nakon prethodnog
         trenutni->sljedeca = prethodni->sljedeca;
         prethodni->sljedeca = trenutni;
 
-        prethodni = trenutni; // nova učitana osoba će biti prethodna osoba u sljedećoj iteraciji
+        prethodni = trenutni;
     }
 
     fclose(pokazivacFajla);
