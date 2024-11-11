@@ -5,7 +5,6 @@
 #include <string.h>
 
 #define MAX_LINE 1024
-#define MAX_SIZE 50
 #define EXIT_SUCCESS 0
 #define FILE_ERROR_OPEN -1
 #define MALLOC_ERROR -2
@@ -15,8 +14,8 @@ struct _osoba;
 typedef struct _osoba* Pozicija;
 
 typedef struct _osoba {
-    char ime[MAX_SIZE];
-    char prezime[MAX_SIZE];
+    char ime[50];
+    char prezime[50];
     int godinaRodjenja;
     Pozicija sljedeca;
 } Osoba;
@@ -40,7 +39,7 @@ void main()
     char ulaz = 0;
     FILE* pokazivacFajla = NULL;
 
-    char prezime[MAX_SIZE];
+    char prezime[50];
     Osoba glava = { .sljedeca = NULL, .ime = {0}, .prezime = {0}, .godinaRodjenja = 0 };
     Osoba glavaR = { .sljedeca = NULL, .ime = {0}, .prezime = {0}, .godinaRodjenja = 0 }; // za čitanje iz fajla
 
