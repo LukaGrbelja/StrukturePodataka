@@ -1,0 +1,5 @@
+2023-12-09
+Jabuka, 1, 0.50
+Sprite, 1, 2.01
+Awaziem, 1, 5000000
+Cocacola, 1, 2.19
