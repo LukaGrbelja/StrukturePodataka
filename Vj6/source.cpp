@@ -1,10 +1,21 @@
 #define _CRT_SECURE_NO_WARNINGS
 
+///Dodaj komentare
+///Promjena iz Datum u Datum * u slanju među funkcija
+///Dodaj posebnu funkviju za kretanje kroz liste
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define MAX_LINE 1024
+
+#define EXIT_SUCCESS 0
+#define FILE_OPEN_ERROR -1
+#define MALLOC_ERROR -2
+#define SSCANF_ERROR -3
+#define EMPTY_FILE 1
+#define INVALID_INPUT 2
 
 typedef struct _datum {
 	char godina[5];
@@ -30,7 +41,7 @@ int upit(Racun *);
 void pretraziArtikleSaOpcijom(Racun *, const char *, Datum, Datum);
 Racun* stvoriRacun(Datum);
 Artikl* stvoriArtikl(char *);
-int dodajRacun(Racun *, Racun *);
+void dodajRacun(Racun *, Racun *);
 int dodajArtikl(Artikl *, Racun *);
 int usporediDatume(Datum, Datum);
 Datum parsirajStringUDatum(char *);
@@ -41,12 +52,14 @@ void ispisiDatum(Datum);
 int main() {
     
     Racun listaRacuna = { 0 };
-    ucitajDatoteku("racuni.txt", true, &listaRacuna);
+
+    int status = ucitajDatoteku("racuni.txt", true, &listaRacuna);
+    if (status) return status;
+
     //ispisiRacun(listaRacuna.iduci);
 
     char odluka;
     do {
-
         printf("Napravi upit - y\nZavrši program - n\n");
         
         if (scanf(" %c", &odluka) != 1) {
@@ -63,7 +76,7 @@ int main() {
 
     } while (odluka == 'y' || odluka == 'Y');
     
-    return  0;
+    return EXIT_SUCCESS;
 }
 
 int ucitajDatoteku(const char* imeDatoteke, bool glavnaDatoteka, Racun* listaRacuna) {
@@ -73,40 +86,52 @@ int ucitajDatoteku(const char* imeDatoteke, bool glavnaDatoteka, Racun* listaRac
 
     if (!pokazivacDatoteke) {
         printf("Greška u otvaranju datoteke.\n");
-        return -1;
+        return FILE_OPEN_ERROR;
     }
     
     char buffer[MAX_LINE] = { 0 };
+
+    if (!fgets(buffer, MAX_LINE, pokazivacDatoteke)) {
+        printf("Datoteka %s prazna.\n", imeDatoteke);
+        fclose(pokazivacDatoteke);
+        return EMPTY_FILE;
+    }
     
     if (glavnaDatoteka) {
 
-        while (fgets(buffer, MAX_LINE, pokazivacDatoteke) != NULL) {
+        do {
             buffer[strcspn(buffer, "\n")] = 0;
-            ucitajDatoteku(buffer, false, listaRacuna);
-        }
+            int status = ucitajDatoteku(buffer, false, listaRacuna);
 
-        fclose(pokazivacDatoteke);
+            if (status) {
+                fclose(pokazivacDatoteke);
+                return status;
+            }
+            
+
+        } while (fgets(buffer, MAX_LINE, pokazivacDatoteke));
+
     }
     else {
-        
-        if (!fgets(buffer, MAX_LINE, pokazivacDatoteke)) {
-            printf("Greška: Neispravan format ili čitanje podataka iz datoteke.\n");
-            fclose(pokazivacDatoteke);
-            return -2;
-        }
-
         Racun* racun = stvoriRacun(parsirajStringUDatum(buffer));
 
-        while (fgets(buffer, MAX_LINE, pokazivacDatoteke) != NULL) {
-            dodajArtikl(stvoriArtikl(buffer), racun);
+        if (racun == NULL) {
+            fclose(pokazivacDatoteke);
+            return MALLOC_ERROR;
         }
 
-        fclose(pokazivacDatoteke);
-        dodajRacun(racun, listaRacuna);
+        while (fgets(buffer, MAX_LINE, pokazivacDatoteke)) {
+            if (dodajArtikl(stvoriArtikl(buffer), racun)) {
+                fclose(pokazivacDatoteke);
+                return MALLOC_ERROR;
+            }
+        }
         
+        dodajRacun(racun, listaRacuna);
     }
     
-    return 0;
+    fclose(pokazivacDatoteke);
+    return EXIT_SUCCESS;
 }
 
 int upit(Racun* listaRacuna) {
@@ -125,16 +150,21 @@ int upit(Racun* listaRacuna) {
         pocetak = parsirajStringUDatum(unos);
     }
 
-    printf("Unesite početni datum (YYYY-MM-DD) ili \"Dalje\" za bilo koji: ");
+    printf("Unesite krajnji datum (YYYY-MM-DD) ili \"Dalje\" za bilo koji: ");
     scanf("%s", unos);
 
     if (strcmp(unos, "Dalje") != 0) {
         kraj = parsirajStringUDatum(unos);
     }
 
+    if (!usporediDatume(pocetak, kraj)) {
+        printf("Početni datum je veći od krajnjeg.\n");
+        return INVALID_INPUT;
+    }
+
     pretraziArtikleSaOpcijom(listaRacuna, imeArtikla, pocetak, kraj);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void pretraziArtikleSaOpcijom(Racun* listaRacuna, const char* imeArtikla, Datum pocetak, Datum kraj) {
@@ -175,7 +205,6 @@ void pretraziArtikleSaOpcijom(Racun* listaRacuna, const char* imeArtikla, Datum 
     printf("Ukupno kupljeno: %d komada\nUkupno potrošeno: %.2f€\n", ukupnaKolicina, ukupnaPotrosnja);
 }
 
-
 Racun* stvoriRacun(Datum datum) {
 
     Racun* racun = NULL;
@@ -209,7 +238,7 @@ Artikl* stvoriArtikl(char* detalji) {
     return artikl;
 }
 
-int dodajRacun(Racun* noviRacun, Racun* listaRacuna) {
+void dodajRacun(Racun* noviRacun, Racun* listaRacuna) {
 
     Racun* trenutni = listaRacuna;
 
@@ -219,18 +248,18 @@ int dodajRacun(Racun* noviRacun, Racun* listaRacuna) {
 
     noviRacun->iduci = trenutni->iduci;
     trenutni->iduci = noviRacun;
-
-    return 0;
 }
 
 int dodajArtikl(Artikl* noviArtikl, Racun* racun) {///ovo triba provjerit nisan siguran kako triba napravit bez da stavin prvi u poseban uvjet
+
+    if (noviArtikl == NULL) return MALLOC_ERROR;
 
     Artikl* trenutni = racun->listaArtikla;
 
     if (trenutni == NULL || strcmp(trenutni->ime, noviArtikl->ime) > 0) {
         noviArtikl->iduci = racun->listaArtikla;
         racun->listaArtikla = noviArtikl;
-        return 0;
+        return EXIT_SUCCESS;
     }
 
     while (trenutni->iduci && strcmp(trenutni->iduci->ime, noviArtikl->ime) < 0) {
@@ -240,7 +269,7 @@ int dodajArtikl(Artikl* noviArtikl, Racun* racun) {///ovo triba provjerit nisan 
     noviArtikl->iduci = trenutni->iduci;
     trenutni->iduci = noviArtikl;
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int usporediDatume(Datum trenutni, Datum novi) {
@@ -255,14 +284,30 @@ int usporediDatume(Datum trenutni, Datum novi) {
 
     int dan1 = atoi(trenutni.dan), dan2 = atoi(novi.dan);
     return dan1 < dan2;
+    /*
+    if (dan1 > dan1) return 0;
+    if (dan1 < dan1) return 1;
+    return -1;
+    */
 }
 
-Datum parsirajStringUDatum(char* datumChar) {
+Datum parsirajStringUDatum(char* datumChar) {///moguće buduće minjanje tipa funkcije iz Datum (char*) u int (char *, Datum *)
 
-    Datum datum;
-    sscanf(datumChar, "%4s-%2s-%2s", datum.godina, datum.misec, datum.dan);
+    /*if (!datumChar || strlen(datumChar) != 10 || datumChar[4] != '-' || datumChar[7] != '-') {
+        printf("Neispravan format datuma.\n");
+        return INVALID_INPUT;
+    }*/
+
+    Datum datum = { "0000", "00", "00" };
+    sscanf(datumChar, "%4[0-9]-%2[0-9]-%2[0-9]", datum.godina, datum.misec, datum.dan);
+
+    /*if (brojParsiranih != 3) {
+        printf("Pogreška prilikom skeniranja\n");
+        return SS;
+    }*/
 
     return datum;
+    //return EXIT_SUCCESS;
 }
 
 void ispisiRacun(Racun* racun) {
