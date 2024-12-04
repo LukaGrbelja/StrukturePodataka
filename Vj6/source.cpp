@@ -77,7 +77,7 @@ int main() {
 
     } while (odluka == 'y' || odluka == 'Y');
 
-    oslobodiMemoriju(listaRacuna);
+    oslobodiMemoriju(&listaRacuna);
     return EXIT_SUCCESS;
 }
 
