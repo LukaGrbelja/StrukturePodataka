@@ -26,11 +26,13 @@ typedef struct _racun {
 } Racun;
 
 int ucitajDatoteku(const char *, bool, Racun *);
+int upit(Racun *);
+void pretraziArtikleSaOpcijom(Racun *, const char *, Datum, Datum);
 Racun* stvoriRacun(Datum);
 Artikl* stvoriArtikl(char *);
 int dodajRacun(Racun *, Racun *);
 int dodajArtikl(Artikl *, Racun *);
-int usporediRacune(Datum, Datum);
+int usporediDatume(Datum, Datum);
 Datum parsirajStringUDatum(char *);
 void ispisiRacun(Racun *);
 void ispisiArtikl(Artikl *);
@@ -40,7 +42,26 @@ int main() {
     
     Racun listaRacuna = { 0 };
     ucitajDatoteku("racuni.txt", true, &listaRacuna);
-    ispisiRacun(listaRacuna.iduci);
+    //ispisiRacun(listaRacuna.iduci);
+
+    char odluka;
+    do {
+
+        printf("Napravi upit - y\nZavrši program - n\n");
+        
+        if (scanf(" %c", &odluka) != 1) {
+            printf("Neispravan unos. Pokušajte ponovo.bbb\n");
+            while (getchar() != '\n');
+            continue;
+        }
+
+        while (getchar() != '\n');
+
+        if (odluka == 'y' || odluka == 'Y') {
+            upit(&listaRacuna);
+        }
+
+    } while (odluka == 'y' || odluka == 'Y');
     
     return  0;
 }
@@ -88,6 +109,73 @@ int ucitajDatoteku(const char* imeDatoteke, bool glavnaDatoteka, Racun* listaRac
     return 0;
 }
 
+int upit(Racun* listaRacuna) {
+
+    char imeArtikla[20], unos[MAX_LINE];
+    Datum pocetak = { "0000", "01", "01" };
+    Datum kraj = { "9999", "12", "31" };
+
+    printf("Unesite ime artikla: ");
+    scanf("%s", imeArtikla);
+
+    printf("Unesite početni datum (YYYY-MM-DD) ili \"Dalje\" za bilo koji: ");
+    scanf("%s", unos);
+
+    if (strcmp(unos, "Dalje") != 0) {
+        pocetak = parsirajStringUDatum(unos);
+    }
+
+    printf("Unesite početni datum (YYYY-MM-DD) ili \"Dalje\" za bilo koji: ");
+    scanf("%s", unos);
+
+    if (strcmp(unos, "Dalje") != 0) {
+        kraj = parsirajStringUDatum(unos);
+    }
+
+    pretraziArtikleSaOpcijom(listaRacuna, imeArtikla, pocetak, kraj);
+
+    return 0;
+}
+
+void pretraziArtikleSaOpcijom(Racun* listaRacuna, const char* imeArtikla, Datum pocetak, Datum kraj) {
+
+    int ukupnaKolicina = 0;
+    float ukupnaPotrosnja = 0;
+    
+    Racun* trenutni = listaRacuna->iduci;
+    while (trenutni != NULL) {
+        
+        if (usporediDatume(trenutni->datum, pocetak)) {
+            trenutni = trenutni->iduci;
+            continue;
+        }
+
+        if (!usporediDatume(trenutni->datum, kraj)) {
+            break;
+        }
+
+        Artikl* trenutniArtikl = trenutni->listaArtikla;
+
+        while (trenutniArtikl != NULL) {
+            if (strcmp(trenutniArtikl->ime, imeArtikla) > 0) {
+                break;
+            }
+
+            if (strcmp(trenutniArtikl->ime, imeArtikla) == 0) {
+                ukupnaKolicina += trenutniArtikl->kolicina;
+                ukupnaPotrosnja += trenutniArtikl->kolicina * trenutniArtikl->cijena;
+            }
+
+            trenutniArtikl = trenutniArtikl->iduci;
+        }
+
+        trenutni = trenutni->iduci;
+    }
+
+    printf("Ukupno kupljeno: %d komada\nUkupno potrošeno: %.2f€\n", ukupnaKolicina, ukupnaPotrosnja);
+}
+
+
 Racun* stvoriRacun(Datum datum) {
 
     Racun* racun = NULL;
@@ -125,7 +213,7 @@ int dodajRacun(Racun* noviRacun, Racun* listaRacuna) {
 
     Racun* trenutni = listaRacuna;
 
-    while (trenutni->iduci != NULL && usporediRacune(trenutni->iduci->datum, noviRacun->datum)) {
+    while (trenutni->iduci != NULL && usporediDatume(trenutni->iduci->datum, noviRacun->datum)) {
         trenutni = trenutni->iduci;
     }
 
@@ -155,7 +243,7 @@ int dodajArtikl(Artikl* noviArtikl, Racun* racun) {///ovo triba provjerit nisan 
     return 0;
 }
 
-int usporediRacune(Datum trenutni, Datum novi) {
+int usporediDatume(Datum trenutni, Datum novi) {
     
     int godina1 = atoi(trenutni.godina), godina2 = atoi(novi.godina);
     if (godina1 > godina2) return 0;
@@ -183,6 +271,7 @@ void ispisiRacun(Racun* racun) {
         printf("Adresa racuna: %p\nAdresa datuma: %p\n", racun, &racun->datum);
         ispisiDatum(racun->datum);
         ispisiArtikl(racun->listaArtikla);
+        printf("Adresa iduceg racuna: %p", racun->iduci);
         racun = racun->iduci;
     }
 }
@@ -190,7 +279,7 @@ void ispisiRacun(Racun* racun) {
 void ispisiArtikl(Artikl* artikl) {
     
     while (artikl != NULL) {
-        printf("Adresa artikla: %p\n\tIme: %s\n\tKolicina: %d\n\tCijena: %f\n", artikl, artikl->ime, artikl->kolicina, artikl->cijena);
+        printf("Adresa artikla: %p\n\tIme: %s\n\tKolicina: %d\n\tCijena: %.2f\n", artikl, artikl->ime, artikl->kolicina, artikl->cijena);
         artikl = artikl->iduci;
     }
 }
