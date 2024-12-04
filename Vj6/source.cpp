@@ -48,6 +48,7 @@ Datum parsirajStringUDatum(char *);
 void ispisiRacun(Racun *);
 void ispisiArtikl(Artikl *);
 void ispisiDatum(Datum);
+void oslobodiMemoriju(Racun *);
 
 int main() {
     
@@ -75,7 +76,8 @@ int main() {
         }
 
     } while (odluka == 'y' || odluka == 'Y');
-    
+
+    oslobodiMemoriju(listaRacuna);
     return EXIT_SUCCESS;
 }
 
@@ -331,4 +333,24 @@ void ispisiArtikl(Artikl* artikl) {
 
 void ispisiDatum(Datum datum) {
     printf("\tDan: %s\n\tMisec: %s\n\tGodina: %s\n", datum.dan, datum.misec, datum.godina);
+}
+
+void oslobodiMemoriju(Racun* listaRacuna) {
+    Racun* trenutniRacun = listaRacuna;
+    
+    while (trenutniRacun != NULL) {
+        Racun* tempRacun = trenutniRacun;
+        
+        Artikl* trenutniArtikl = trenutniRacun->listaArtikla;
+        while (trenutniArtikl != NULL) {
+            Artikl* tempArtikl = trenutniArtikl;
+            trenutniArtikl = trenutniArtikl->iduci;
+            free(tempArtikl);
+        }
+
+        trenutniRacun = trenutniRacun->iduci;
+        free(tempRacun);
+    }
+
+    printf("Memorija za račune i artikle je uspješno oslobođena.\n");
 }
